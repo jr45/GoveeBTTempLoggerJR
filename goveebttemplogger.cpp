@@ -52,10 +52,16 @@
 
 #include <algorithm>
 #include <arpa/inet.h>
+
+#ifndef NO_BLUETOOTH
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/l2cap.h>
+#else
+#include "bthelpers.h"  
+#endif // NO_BLUETOOTH
+
 #include <cfloat>
 #include <climits>
 #include <cmath>
@@ -83,8 +89,18 @@
 #include <utime.h>
 #include <vector>
 
+#ifdef __CYGWIN__
+// for religious reasons, CYGWIN doesn't do lstat64
+#define stat64 stat
+#define lstat64 lstat
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
-static const std::string ProgramVersionString("GoveeBTTempLogger Version 2.20221101-1 Built on: " __DATE__ " at " __TIME__);
+static const std::string ProgramVersionString("GoveeBTTempLogger Version" 
+#ifdef NO_BLUETOOTH
+  " (NO BLUETOOTH)"
+#endif  
+  " 2.20221101-1 Built on: " __DATE__ " at " __TIME__);
 /////////////////////////////////////////////////////////////////////////////
 std::string timeToISO8601(const time_t & TheTime)
 {
@@ -1558,6 +1574,7 @@ void WriteAllSVG()
 }
 /////////////////////////////////////////////////////////////////////////////
 // Connect to a Govee Thermometer device over Bluetooth and download its historical data.
+#ifndef NO_BLUETOOTH
 void ConnectAndDownload(int device_handle)
 {
 	time_t TimeNow;
@@ -1767,6 +1784,8 @@ void ConnectAndDownload(int device_handle)
 		}
 	}
 }
+#endif // NO_BLUETOOTH
+
 /////////////////////////////////////////////////////////////////////////////
 int LogFileTime = 60;
 int MinutesAverage = 5;
@@ -1935,6 +1954,7 @@ int main(int argc, char **argv)
 		WriteAllSVG();
 	}
 	///////////////////////////////////////////////////////////////////////////////////////////////
+#ifndef NO_BLUETOOTH
 	int device_id;
 	if (ControllerAddress.empty())
 		device_id = hci_get_route(NULL);
@@ -2346,6 +2366,8 @@ int main(int argc, char **argv)
 			}
 		}
 	}
+#endif // NO_BLUETOOTH
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	std::cerr << ProgramVersionString << " (exiting)" << std::endl;
 	return(EXIT_SUCCESS);
