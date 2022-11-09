@@ -217,6 +217,7 @@ std::string timeToExcelLocal(const time_t& TheTime)
 }
 /////////////////////////////////////////////////////////////////////////////
 int ConsoleVerbosity = 1;
+bool g_bMostRecentValueLeft = true;
 std::string LogDirectory;	// If this remains empty, log Files are not created.
 std::string SVGDirectory;	// If this remains empty, SVG Files are not created. If it's specified, _day, _week, _month, and _year.svg files are created for each bluetooth address seen.
 int SVGBattery = 0; // 0x01 = Draw Battery line on daily, 0x02 = Draw Battery line on weekly, 0x04 = Draw Battery line on monthly, 0x08 = Draw Battery line on yearly
@@ -1803,6 +1804,7 @@ static void usage(int argc, char **argv)
 	std::cout << "    -o | --only XX:XX:XX:XX:XX:XX only report this address" << std::endl;
 	std::cout << "    -C | --controller XX:XX:XX:XX:XX:XX use the controller with this address" << std::endl;
 	std::cout << "    -a | --average minutes [" << MinutesAverage << "]" << std::endl;
+	std::cout << "    -r | --right         right align graph, i.e. most recent value on right side (default: align left)" << std::endl;
 	std::cout << "    -s | --svg name      SVG output directory" << std::endl;
 	std::cout << "    -T | --titlemap name SVG title fully qualified filename" << std::endl;
 	std::cout << "    -c | --celsius       SVG output using degrees C" << std::endl;
@@ -1811,7 +1813,7 @@ static void usage(int argc, char **argv)
 	std::cout << "    -d | --download      Periodically attempt to connect and download stored data" << std::endl;
 	std::cout << std::endl;
 }
-static const char short_options[] = "hl:t:v:m:o:C:a:s:T:cb:x:d";
+static const char short_options[] = "hl:t:v:m:o:C:a:rs:T:cb:x:d";
 static const struct option long_options[] = {
 		{ "help",   no_argument,       NULL, 'h' },
 		{ "log",    required_argument, NULL, 'l' },
@@ -1821,6 +1823,7 @@ static const struct option long_options[] = {
 		{ "only",	required_argument, NULL, 'o' },
 		{ "controller", required_argument, NULL, 'C' },
 		{ "average",required_argument, NULL, 'a' },
+		{ "right",	no_argument, NULL, 'r' },
 		{ "svg",	required_argument, NULL, 's' },
 		{ "titlemap",	required_argument, NULL, 'T' },
 		{ "celsius",no_argument,       NULL, 'c' },
@@ -1883,6 +1886,9 @@ int main(int argc, char **argv)
 			break;
 		case 'd':
 			DownloadData = true;
+			break;
+		case 'r':
+			g_bMostRecentValueLeft = false;
 			break;
 		case 's':
 			TempString = std::string(optarg);
